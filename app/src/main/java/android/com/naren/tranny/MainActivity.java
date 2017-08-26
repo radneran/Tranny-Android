@@ -167,6 +167,9 @@ public class MainActivity extends AppCompatActivity {
                 Parcelable[] Uuids = intent.getParcelableArrayExtra(BluetoothDevice.EXTRA_UUID);
                 if (!connected) {
                     if (Uuids != null) {
+                        /*for (Parcelable uuid : Uuids) {
+                            Log.d(TAG, "Received UUID: "+ uuid.toString());
+                        }*/
                         for (Parcelable uuid : Uuids) {
                             Log.d(TAG, "Received UUID: "+ uuid.toString());
                             nearestUuid = uuid;
@@ -177,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                                     connectNearest.start();
                                     connected = true;
                                 }
-                             //   displayFoundDevices.append("UUID: " + uuid.toString() + " \n");
+                                displayFoundDevices.append("UUID: " + uuid.toString() + " \n");
                                 break;
                             }
                         }
@@ -278,12 +281,12 @@ public class MainActivity extends AppCompatActivity {
                         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                     } else {
-                      /*  Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
                         if (pairedDevices.size() > 0) {
                             // There are paired devices. Get the name and address of each paired device.
                             for (BluetoothDevice device : pairedDevices) {
                                 String deviceName = device.getName();
-                      //          if (deviceName.equals("RAD"))
+                                if (deviceName.equals("RAD"))
                                     nearestDevice = device;
                                 String deviceHardwareAddress = device.getAddress(); // MAC address
 
@@ -291,8 +294,9 @@ public class MainActivity extends AppCompatActivity {
 
                                 displayFoundDevices.append("Paired Device: " + deviceName + "\nMAC Address:" + deviceHardwareAddress + "\n");
                                 ParcelUuid[] dUuids = device.getUuids();
-                                if(dUuids!=null){
+                                /*if(dUuids!=null){
                                     for(ParcelUuid u: dUuids){
+                                        Log.i(TAG, "UUID: " + u.toString());
                                         if(u.getUuid().equals(service)){
                                             ConnectThread connectNearest = new ConnectThread(nearestDevice, u.getUuid());
                                             connectNearest.start();
@@ -300,9 +304,9 @@ public class MainActivity extends AppCompatActivity {
                                             break;
                                         }
                                     }
-                                }else{
+                                }else{*/
                                     device.fetchUuidsWithSdp();
-                                }
+                                //}
                                 if(connected)
                                     break;
                             }
@@ -310,13 +314,13 @@ public class MainActivity extends AppCompatActivity {
                                 tv.setText(displayFoundDevices);
                         } else {
                             Log.d(TAG, "No paired devices.");
-                      */      if (!mBluetoothAdapter.startDiscovery()) {
+                            if (!mBluetoothAdapter.startDiscovery()) {
                                 Log.d(TAG, "Could not start discovery!");
                             } else
                                 Log.d(TAG, "Searching for devices...");
                         }
                         return;
-                   // }
+                    }
                 } else {
                     if (tv != null)
                         tv.setText("Device requires location access to start bluetooth. Please restart the application and grant permission when prompted.");
@@ -389,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
 
         public void run() {
             // Cancel discovery because it otherwise slows down the connection.
-            //mBluetoothAdapter.cancelDiscovery();
+            mBluetoothAdapter.cancelDiscovery();
 
             try {
                 // Connect to the remote device through the socket. This call blocks
@@ -398,6 +402,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Connecting...");
 
             } catch (IOException connectException) {
+                connectException.printStackTrace();
                 Log.e(TAG, "Attempting to connect through Fallback");
                 try {
                     Log.d(TAG, "trying fallback...");
@@ -486,8 +491,9 @@ public class MainActivity extends AppCompatActivity {
                 try {
 
                     if (!connEstablished) {
+                       // mmOutStream.write(send);
+                       // Log.d(TAG, "Wrote to stream");
                         Log.d(TAG, "Trying to read input stream");
-
                         numBytes = mmInStream.read(mmBuffer);
                         //tmpBuffer.write(mmBuffer);
                         Log.d(TAG, "numBytes = " + numBytes + "\n");
